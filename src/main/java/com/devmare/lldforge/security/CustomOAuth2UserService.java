@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -124,5 +126,30 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throw new AppInfoException("Missing attribute: " + key, HttpStatus.BAD_REQUEST);
         }
         return value.toString();
+    }
+
+    /**
+     * Retrieves the currently authenticated user from the security context.
+     *
+     * @return The authenticated {@link User} entity from the database.
+     * @throws AppInfoException if the user is not authenticated, GitHub ID is missing, or the user is not found in the database.
+     */
+    public User getCurrentAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof OAuth2User oAuth2User)) {
+            throw new AppInfoException("User not authenticated", HttpStatus.UNAUTHORIZED);
+        }
+
+        String githubId = oAuth2User.getAttribute("id");
+
+        if (githubId == null) {
+            throw new AppInfoException("GitHub ID is missing", HttpStatus.BAD_REQUEST);
+        }
+
+        Optional<User> optionalUser = userRepository.findByGithubId(githubId);
+        if (optionalUser.isEmpty()) {
+            throw new AppInfoException("User not found", HttpStatus.NOT_FOUND);
+        }
+        return optionalUser.get();
     }
 }

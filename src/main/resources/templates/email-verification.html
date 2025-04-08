@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify Your Email</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f8fb;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        .button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Hi <span th:text="${name}">User</span>,</h2>
+    <p>Thanks for joining LLD Forge! To get started, please verify your email address by clicking the button below:</p>
+
+    <a th:href="${verificationLink}" class="button">Verify Email</a>
+
+    <p>If the button doesn't work, copy and paste this link into your browser:</p>
+    <p><a th:href="${verificationLink}" th:text="${verificationLink}">verification link</a></p>
+
+    <div class="footer">
+        <p>If you didn’t create an account, you can safely ignore this email.</p>
+    </div>
+</div>
+</body>
+</html>
