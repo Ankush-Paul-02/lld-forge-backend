@@ -16,6 +16,7 @@ public class User {
     @Id
     private String id;
 
+    private String email;
     private String githubId;
     private String username;
     private String name;
@@ -25,4 +26,7 @@ public class User {
     @Builder.Default
     private Role role = Role.STUDENT;
     private Long joinedAt;
+
+    @Builder.Default
+    private Boolean isEmailVerified = false;
 }

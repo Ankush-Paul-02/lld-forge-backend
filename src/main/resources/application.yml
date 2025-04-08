@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: lldforge backend
+
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${ClientId}
+            client-secret: ${ClientSecrets}
+            scope: user:email
+
+  data:
+    mongodb:
+      uri: ${mongodbUri}
+      database: ${dbName}
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 60000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+  cache:
+    type: redis
+
+  mail:
+    host: ${SPRING_MAIL_HOST}
+    port: ${SPRING_MAIL_PORT}
+    username: ${SPRING_MAIL_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+lldforge:
+  adminEmail: ${adminEmail}
+server:
+  port: 8081
+
+app:
+  mentor-lock:
+    wait-time: 10 # in seconds
+    lease-time: 30 # in seconds
