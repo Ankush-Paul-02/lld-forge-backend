@@ -26,7 +26,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/login/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/mentor/**").hasAuthority("ROLE_MENTOR")
+                        .requestMatchers("/mentor/**").hasAnyRole("ROLE_ADMIN", "ROLE_MENTOR")
+                        .requestMatchers("/student/**").hasAnyRole("ROLE_ADMIN", "ROLE_MENTOR", "ROLE_STUDENT")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptions -> exceptions
