@@ -1,8 +1,6 @@
 package com.devmare.lldforge.business.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -11,6 +9,8 @@ import javax.validation.constraints.Size;
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class MentorApplicationRequestDto {
 
     @Email(message = "Invalid email format")
