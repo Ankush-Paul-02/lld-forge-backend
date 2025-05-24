@@ -12,13 +12,13 @@ import static com.devmare.lldforge.business.dto.DefaultResponseDto.Status.SUCCES
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/student")
+@RequestMapping("/student")
 public class StudentController {
 
     private final QuestionService questionService;
 
     @GetMapping("/question/{id}")
-    public ResponseEntity<DefaultResponseDto> getQuestionById(@PathVariable String id) {
+    public ResponseEntity<DefaultResponseDto> getQuestionById(@PathVariable Long id) {
         return ResponseEntity.ok(new DefaultResponseDto(
                 SUCCESS,
                 Map.of("data", questionService.getQuestionById(id)),

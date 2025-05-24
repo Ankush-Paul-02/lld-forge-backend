@@ -3,7 +3,7 @@ package com.devmare.lldforge.business.service.impl;
 import com.devmare.lldforge.business.dto.CreateQuestionRequestDto;
 import com.devmare.lldforge.business.service.QuestionService;
 import com.devmare.lldforge.data.entity.Question;
-import com.devmare.lldforge.data.entity.Topic;
+import com.devmare.lldforge.data.enums.Topic;
 import com.devmare.lldforge.data.entity.User;
 import com.devmare.lldforge.data.enums.Difficulty;
 import com.devmare.lldforge.data.exception.AppInfoException;
@@ -40,7 +40,7 @@ public class QuestionServiceImpl implements QuestionService {
                 .constraints(dto.getConstraints())
                 .expectedEntitiesDescription(dto.getExpectedEntitiesDescription() != null ? dto.getExpectedEntitiesDescription() : "")
                 .difficulty(dto.getDifficulty())
-                .authorId(mentor.getId())
+                .author(mentor)
                 .postedAt(Instant.now().getEpochSecond())
                 .build();
 
@@ -48,7 +48,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public Question getQuestionById(String id) {
+    public Question getQuestionById(Long id) {
         Optional<Question> optionalQuestion = questionRepository.findById(id);
         if (optionalQuestion.isEmpty()) {
             throw new AppInfoException("Question not found.", HttpStatus.NOT_FOUND);
@@ -86,7 +86,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public void deleteQuestionById(String id) {
+    public void deleteQuestionById(Long id) {
         Optional<Question> optionalQuestion = questionRepository.findById(id);
         if (optionalQuestion.isEmpty()) {
             throw new AppInfoException("Question not found.", HttpStatus.NOT_FOUND);
@@ -95,7 +95,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public Question updateQuestion(String id, CreateQuestionRequestDto updatedQuestion) {
+    public Question updateQuestion(Long id, CreateQuestionRequestDto updatedQuestion) {
         Optional<Question> optionalQuestion = questionRepository.findById(id);
         if (optionalQuestion.isEmpty()) {
             throw new AppInfoException("Question not found.", HttpStatus.NOT_FOUND);

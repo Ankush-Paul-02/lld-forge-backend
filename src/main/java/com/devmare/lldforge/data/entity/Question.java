@@ -1,9 +1,9 @@
 package com.devmare.lldforge.data.entity;
 
 import com.devmare.lldforge.data.enums.Difficulty;
+import com.devmare.lldforge.data.enums.Topic;
+import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
@@ -12,11 +12,9 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collation = "questions")
-public class Question {
-
-    @Id
-    private String id;
+@Entity
+@Table(name = "questions")
+public class Question extends BaseEntity {
 
     private String title;
 
@@ -28,9 +26,11 @@ public class Question {
 
     private String expectedEntitiesDescription;
 
-    private String authorId;
+    @OneToOne
+    private User author;
 
     private Long postedAt;
 
+    @Enumerated(EnumType.STRING)
     private Difficulty difficulty;
 }

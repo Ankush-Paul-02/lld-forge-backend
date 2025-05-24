@@ -1,6 +1,10 @@
+
 spring:
+  profiles:
+    active:
+      - dev
   application:
-    name: lldforge backend
+    name: lldforge_backend
 
   security:
     oauth2:
@@ -9,24 +13,37 @@ spring:
           github:
             client-id: ${ClientId}
             client-secret: ${ClientSecrets}
-            scope: user:email
+            scope:
+              - read:user
+              - user:email
 
-  data:
-    mongodb:
-      uri: ${mongodbUri}
-      database: ${dbName}
-    redis:
-      host: localhost
-      port: 6379
-      timeout: 60000
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 0
+  datasource:
+    url: jdbc:mysql://localhost:3306/lldforge
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
-  cache:
-    type: redis
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    database: mysql
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+#  data:
+#    redis:
+#      host: ${SPRING_REDIS_HOST}
+#      port: ${SPRING_REDIS_PORT}
+#      password: ${SPRING_REDIS_PASSWORD}
+#      timeout: 60000
+#      lettuce:
+#        pool:
+#          max-active: 8
+#          max-idle: 8
+#          min-idle: 0
+#
+#  cache:
+#    type: redis
 
   mail:
     host: ${SPRING_MAIL_HOST}

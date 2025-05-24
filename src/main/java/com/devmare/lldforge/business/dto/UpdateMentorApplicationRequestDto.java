@@ -10,7 +10,7 @@ import javax.validation.constraints.NotBlank;
 public class UpdateMentorApplicationRequestDto {
 
     @NotBlank(message = "Application id is required!")
-    private String id;
+    private Long id;
 
     @NotBlank(message = "Application status is required!")
     private String status;

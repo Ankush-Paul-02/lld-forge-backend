@@ -16,7 +16,7 @@ import static com.devmare.lldforge.business.dto.DefaultResponseDto.Status.SUCCES
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/admin")
+@RequestMapping("/admin")
 public class AdminController {
 
     private final MentorApplicationService mentorApplicationService;
@@ -43,7 +43,7 @@ public class AdminController {
     }
 
     @PatchMapping("/mentor-application/{id}/under-review")
-    public ResponseEntity<DefaultResponseDto> markAsUnderReview(@PathVariable String id) {
+    public ResponseEntity<DefaultResponseDto> markAsUnderReview(@PathVariable Long id) {
         mentorApplicationService.markApplicationAsUnderReview(id);
         return ResponseEntity.ok(
                 new DefaultResponseDto(

@@ -10,7 +10,7 @@ public interface QuestionService {
 
     Question postQuestion(CreateQuestionRequestDto question);
 
-    Question getQuestionById(String id);
+    Question getQuestionById(Long id);
 
     List<Question> getAllQuestions();
 
@@ -18,7 +18,7 @@ public interface QuestionService {
 
     Page<Question> getQuestionsByDifficulty(String difficulty, int page, int size);
 
-    void deleteQuestionById(String id);
+    void deleteQuestionById(Long id);
 
-    Question updateQuestion(String id, CreateQuestionRequestDto updatedQuestion);
+    Question updateQuestion(Long id, CreateQuestionRequestDto updatedQuestion);
 }

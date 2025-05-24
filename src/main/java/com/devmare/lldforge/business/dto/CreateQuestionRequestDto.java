@@ -1,6 +1,6 @@
 package com.devmare.lldforge.business.dto;
 
-import com.devmare.lldforge.data.entity.Topic;
+import com.devmare.lldforge.data.enums.Topic;
 import com.devmare.lldforge.data.enums.Difficulty;
 import lombok.*;
 

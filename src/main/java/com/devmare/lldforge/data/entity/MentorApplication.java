@@ -1,10 +1,8 @@
 package com.devmare.lldforge.data.entity;
 
 import com.devmare.lldforge.data.enums.MentorApplicationStatus;
+import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -16,17 +14,16 @@ import java.time.Instant;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Document(collection = "mentor_applications")
-public class MentorApplication {
-
-    @Id
-    private String id;
-
-    private String studentId;
+@Entity
+@Table(
+        name = "mentor_applications",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"email"})
+)
+public class MentorApplication extends BaseEntity {
 
     @Email(message = "Invalid email format")
     @NotBlank(message = "Email is required")
-    @Indexed(unique = true)
+    @Column(unique = true)
     private String email;
 
     @NotBlank(message = "Experience is required")
@@ -34,16 +31,21 @@ public class MentorApplication {
     private String experience;
 
     @Builder.Default
+    @Enumerated(EnumType.STRING)
     private MentorApplicationStatus status = MentorApplicationStatus.PENDING;
 
     private Long appliedAt = Instant.now().getEpochSecond();
 
     private Long reviewedAt;
 
-    private String reviewedBy;
+    @OneToOne
+    private User reviewedBy;
 
     @Builder.Default
     private Boolean isUnderReview = false;
 
     private String rejectionReason;
+
+    @OneToOne
+    private User user;
 }
