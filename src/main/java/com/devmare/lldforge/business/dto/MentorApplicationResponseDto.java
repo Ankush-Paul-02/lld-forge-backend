@@ -11,9 +11,9 @@ import lombok.*;
 @NoArgsConstructor
 public class MentorApplicationResponseDto {
 
-    private String id;
+    private Long id;
 
-    private String studentId;
+    private Long userId;
 
     private String email;
 
@@ -30,7 +30,7 @@ public class MentorApplicationResponseDto {
     public static MentorApplicationResponseDto fromEntity(MentorApplication mentorApplication) {
         return MentorApplicationResponseDto.builder()
                 .id(mentorApplication.getId())
-                .studentId(mentorApplication.getStudentId())
+                .userId(mentorApplication.getUser() != null ? mentorApplication.getUser().getId() : null)
                 .email(mentorApplication.getEmail())
                 .experience(mentorApplication.getExperience())
                 .status(mentorApplication.getStatus())

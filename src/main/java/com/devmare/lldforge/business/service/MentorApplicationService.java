@@ -13,7 +13,7 @@ public interface MentorApplicationService {
 
     Page<MentorApplicationResponseDto> getAllMentorApplications(int page, int size, String sortBy, String direction);
 
-    void markApplicationAsUnderReview(String applicationId);
+    void markApplicationAsUnderReview(Long applicationId);
 
     MentorApplicationResponseDto updateMentorApplication(UpdateMentorApplicationRequestDto requestDto);
 }

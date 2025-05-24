@@ -14,7 +14,7 @@ import static com.devmare.lldforge.business.dto.DefaultResponseDto.Status.SUCCES
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/mentor")
+@RequestMapping("/mentor")
 public class MentorController {
 
     private final QuestionService questionService;
@@ -30,7 +30,7 @@ public class MentorController {
 
     @PutMapping("/question/edit/{id}")
     public ResponseEntity<DefaultResponseDto> updateQuestion(
-            @PathVariable String id,
+            @PathVariable Long id,
             @Valid @RequestBody CreateQuestionRequestDto dto
     ) {
         return ResponseEntity.ok(new DefaultResponseDto(
@@ -42,7 +42,7 @@ public class MentorController {
 
     @DeleteMapping("/question/delete/{id}")
     public ResponseEntity<DefaultResponseDto> deleteQuestion(
-            @PathVariable String id
+            @PathVariable Long id
     ) {
         questionService.deleteQuestionById(id);
         return ResponseEntity.ok(new DefaultResponseDto(

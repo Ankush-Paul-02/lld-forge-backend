@@ -1,4 +1,4 @@
-package com.devmare.lldforge.data.entity;
+package com.devmare.lldforge.data.enums;
 
 public enum Topic {
     LLD,

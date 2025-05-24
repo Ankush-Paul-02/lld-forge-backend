@@ -14,7 +14,7 @@ import static com.devmare.lldforge.business.dto.DefaultResponseDto.Status.SUCCES
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/mentor-application")
+@RequestMapping("/mentor-application")
 public class MentorApplicationController {
 
     private final MentorApplicationService mentorApplicationService;

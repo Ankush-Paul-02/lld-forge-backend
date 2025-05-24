@@ -12,7 +12,7 @@ import static com.devmare.lldforge.business.dto.DefaultResponseDto.Status.SUCCES
 
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/email")
 @RequiredArgsConstructor
 public class EmailVerificationController {
 

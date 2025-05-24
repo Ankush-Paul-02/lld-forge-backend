@@ -36,7 +36,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         String token = UUID.randomUUID().toString();
 
         EmailVerificationToken verificationToken = EmailVerificationToken.builder()
-                .userId(currentAuthenticatedUser.getId())
+                .user(currentAuthenticatedUser)
                 .token(token)
                 .createdAt(Instant.now())
                 .expiresAt(Instant.now().plusSeconds(3600))
@@ -73,7 +73,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
             throw new AppInfoException("Verification token has expired", HttpStatus.GONE);
         }
 
-        Optional<User> optionalUser = userRepository.findById(emailVerificationToken.getUserId());
+        Optional<User> optionalUser = userRepository.findById(emailVerificationToken.getUser().getId());
         if (optionalUser.isEmpty()) {
             throw new AppInfoException("User not found", HttpStatus.CONFLICT);
         }
