@@ -7,7 +7,7 @@ import com.devmare.lldforge.data.entity.User;
 import com.devmare.lldforge.data.exception.AppInfoException;
 import com.devmare.lldforge.data.repository.EmailVerificationTokenRepository;
 import com.devmare.lldforge.data.repository.UserRepository;
-import com.devmare.lldforge.security.CustomOAuth2UserService;
+import com.devmare.lldforge.security.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,12 +24,12 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
     private final UserRepository userRepository;
     private final EmailService emailService;
-    private final CustomOAuth2UserService customOAuth2UserService;
+    private final AuthenticationService authenticationService;
 
     @Override
     public void sendVerificationEmail(String email) {
 
-        User currentAuthenticatedUser = customOAuth2UserService.getCurrentAuthenticatedUser();
+        User currentAuthenticatedUser = authenticationService.fetchAuthenticatedUser();
         currentAuthenticatedUser.setEmail(email);
         userRepository.save(currentAuthenticatedUser);
 

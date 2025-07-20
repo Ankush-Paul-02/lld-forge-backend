@@ -3,12 +3,12 @@ package com.devmare.lldforge.business.service.impl;
 import com.devmare.lldforge.business.dto.CreateQuestionRequestDto;
 import com.devmare.lldforge.business.service.QuestionService;
 import com.devmare.lldforge.data.entity.Question;
-import com.devmare.lldforge.data.enums.Topic;
 import com.devmare.lldforge.data.entity.User;
 import com.devmare.lldforge.data.enums.Difficulty;
+import com.devmare.lldforge.data.enums.Topic;
 import com.devmare.lldforge.data.exception.AppInfoException;
 import com.devmare.lldforge.data.repository.QuestionRepository;
-import com.devmare.lldforge.security.CustomOAuth2UserService;
+import com.devmare.lldforge.security.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -27,11 +27,11 @@ import java.util.Optional;
 public class QuestionServiceImpl implements QuestionService {
 
     private final QuestionRepository questionRepository;
-    private final CustomOAuth2UserService customOAuth2UserService;
+    private final AuthenticationService authenticationService;
 
     @Override
     public Question postQuestion(CreateQuestionRequestDto dto) {
-        User mentor = customOAuth2UserService.getCurrentAuthenticatedUser();
+        User mentor = authenticationService.fetchAuthenticatedUser();
 
         Question question = Question.builder()
                 .title(dto.getTitle())

@@ -2,7 +2,7 @@ package com.devmare.lldforge.controller;
 
 import com.devmare.lldforge.business.dto.DefaultResponseDto;
 import com.devmare.lldforge.data.entity.User;
-import com.devmare.lldforge.security.CustomOAuth2UserService;
+import com.devmare.lldforge.security.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -20,11 +20,11 @@ import static com.devmare.lldforge.business.dto.DefaultResponseDto.Status.SUCCES
 @RequestMapping("/users")
 public class UserController {
 
-    private final CustomOAuth2UserService customOAuth2UserService;
+    private final AuthenticationService authenticationService;
 
     @GetMapping("/me")
     public ResponseEntity<DefaultResponseDto> getCurrentUserDetails() {
-        User currentUser = customOAuth2UserService.getCurrentAuthenticatedUser();
+        User currentUser = authenticationService.fetchAuthenticatedUser();
         return ResponseEntity.ok(new DefaultResponseDto(
                 SUCCESS,
                 Map.of("user", currentUser),

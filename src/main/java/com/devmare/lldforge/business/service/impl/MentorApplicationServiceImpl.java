@@ -12,7 +12,7 @@ import com.devmare.lldforge.data.enums.Role;
 import com.devmare.lldforge.data.exception.AppInfoException;
 import com.devmare.lldforge.data.repository.MentorApplicationRepository;
 import com.devmare.lldforge.data.repository.UserRepository;
-import com.devmare.lldforge.security.CustomOAuth2UserService;
+import com.devmare.lldforge.security.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -35,7 +35,7 @@ import static com.devmare.lldforge.data.utils.AppUtils.isValidEmail;
 public class MentorApplicationServiceImpl implements MentorApplicationService {
 
     private final MentorApplicationRepository mentorApplicationRepository;
-    private final CustomOAuth2UserService customOAuth2UserService;
+    private final AuthenticationService authenticationService;
     private final UserRepository userRepository;
     private final EmailService emailService;
 
@@ -51,7 +51,7 @@ public class MentorApplicationServiceImpl implements MentorApplicationService {
     @Override
     @Transactional
     public MentorApplicationResponseDto applyForMentorApplication(MentorApplicationRequestDto mentorApplicationRequestDto) {
-        User user = customOAuth2UserService.getCurrentAuthenticatedUser();
+        User user = authenticationService.fetchAuthenticatedUser();
 
         if (!Boolean.TRUE.equals(user.getIsEmailVerified())) {
             log.warn("User [{}] attempted to apply without email verification", user.getId());
@@ -88,7 +88,7 @@ public class MentorApplicationServiceImpl implements MentorApplicationService {
 
     @Override
     public MentorApplicationResponseDto getMentorApplicationByUserId() {
-        User user = customOAuth2UserService.getCurrentAuthenticatedUser();
+        User user = authenticationService.fetchAuthenticatedUser();
         log.info("Fetching mentor application for user [{}]", user.getId());
 
         Optional<MentorApplication> optionalMentorApplication = mentorApplicationRepository.findByUser(user);
@@ -112,7 +112,7 @@ public class MentorApplicationServiceImpl implements MentorApplicationService {
     @Override
 //    @CacheEvict(value = "mentorApplications", allEntries = true)
     public void markApplicationAsUnderReview(Long applicationId) {
-        User user = customOAuth2UserService.getCurrentAuthenticatedUser();
+        User user = authenticationService.fetchAuthenticatedUser();
         log.info("Admin [{}] marking application [{}] as under review", user.getId(), applicationId);
 
         Optional<MentorApplication> optionalMentorApplication = mentorApplicationRepository.findById(applicationId);
@@ -137,7 +137,7 @@ public class MentorApplicationServiceImpl implements MentorApplicationService {
     @Override
 //    @CacheEvict(value = "mentorApplications", allEntries = true)
     public MentorApplicationResponseDto updateMentorApplication(UpdateMentorApplicationRequestDto requestDto) {
-        User admin = customOAuth2UserService.getCurrentAuthenticatedUser();
+        User admin = authenticationService.fetchAuthenticatedUser();
 
         /// Unique key per application
 //        String lockKey = "mentor:app:lock:" + requestDto.getId();
