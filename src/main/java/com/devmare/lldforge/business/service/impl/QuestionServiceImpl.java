@@ -1,6 +1,7 @@
 package com.devmare.lldforge.business.service.impl;
 
 import com.devmare.lldforge.business.dto.CreateQuestionRequestDto;
+import com.devmare.lldforge.business.dto.MentorLeaderboardProjection;
 import com.devmare.lldforge.business.service.QuestionService;
 import com.devmare.lldforge.data.entity.Question;
 import com.devmare.lldforge.data.entity.User;
@@ -110,5 +111,10 @@ public class QuestionServiceImpl implements QuestionService {
         existingQuestion.setDifficulty(updatedQuestion.getDifficulty());
 
         return questionRepository.save(existingQuestion);
+    }
+
+    @Override
+    public List<MentorLeaderboardProjection> getMentorLeaderboard() {
+        return questionRepository.findMentorLeaderboard();
     }
 }

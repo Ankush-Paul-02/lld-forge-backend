@@ -1,15 +1,16 @@
 package com.devmare.lldforge.controller;
 
 import com.devmare.lldforge.business.dto.DefaultResponseDto;
+import com.devmare.lldforge.business.dto.RazorpayCreateOrderRequestDto;
+import com.devmare.lldforge.business.service.QuestionService;
+import com.devmare.lldforge.business.service.RazorpayService;
 import com.devmare.lldforge.data.entity.User;
 import com.devmare.lldforge.security.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Map;
 
 import static com.devmare.lldforge.business.dto.DefaultResponseDto.Status.SUCCESS;
@@ -20,6 +21,8 @@ import static com.devmare.lldforge.business.dto.DefaultResponseDto.Status.SUCCES
 @RequestMapping("/users")
 public class UserController {
 
+    private final QuestionService questionService;
+    private final RazorpayService razorpayService;
     private final AuthenticationService authenticationService;
 
     @GetMapping("/me")
@@ -30,5 +33,29 @@ public class UserController {
                 Map.of("user", currentUser),
                 "Fetched current authenticated user details"
         ));
+    }
+
+    @GetMapping("/leaderboard/mentors")
+    public ResponseEntity<DefaultResponseDto> getTopMentors() {
+        return ResponseEntity.ok(
+                new DefaultResponseDto(
+                        SUCCESS,
+                        Map.of("data", questionService.getMentorLeaderboard()),
+                        "Top mentors fetched successfully."
+                )
+        );
+    }
+
+    @PostMapping("/mentorship-session/book")
+    public ResponseEntity<DefaultResponseDto> bookMentorshipSession(
+            @Valid @RequestBody RazorpayCreateOrderRequestDto request
+    ) {
+        return ResponseEntity.ok(
+                new DefaultResponseDto(
+                        SUCCESS,
+                        Map.of("data", razorpayService.createOrder(request)),
+                        "Mentorship session booked successfully."
+                )
+        );
     }
 }

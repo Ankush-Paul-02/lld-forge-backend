@@ -34,11 +34,12 @@ spring:
   #  cache:
   #    type: redis
 
+  # Mail configuration
   mail:
     host: smtp.gmail.com
     port: 587
     username: ankushpaulclg2002@gmail.com
-    password: hqde bjjz oahg kajg
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -47,7 +48,7 @@ spring:
             enable: true
 
 lldforge:
-  adminEmail: ${adminEmail}
+  adminEmail: ankushpaulclg2002@gmail.com
 server:
   port: 8081
   servlet:
@@ -57,7 +58,16 @@ app:
   mentor-lock:
     wait-time: 10 # in seconds
     lease-time: 30 # in seconds
+
+# Jwt configuration
   jwt:
     secret: +5Y35EA91Ec1zS64aT3ZvJWeYsgEQpVTeFr7TQmRIA8=
     expiration: 3600000
     refresh-expiration: 864000000
+
+
+# Razorpay sdk configuration
+razorpay:
+  api:
+    key: ${RAZORPAY_API_KEY}
+    secret: ${RAZORPAY_SECRET}

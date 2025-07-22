@@ -55,7 +55,7 @@ public class SecurityConfiguration {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/auth/**", "/webhook/**").permitAll()
                         .requestMatchers("/admin/**").hasRole(Role.ADMIN.name())
                         .requestMatchers("/mentor/**").hasAnyRole(Role.ADMIN.name(), Role.MENTOR.name())
                         .requestMatchers("/student/**").hasAnyRole(Role.ADMIN.name(), Role.MENTOR.name(), Role.STUDENT.name())

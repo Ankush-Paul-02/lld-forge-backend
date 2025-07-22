@@ -1,5 +1,6 @@
 package com.devmare.lldforge.data.entity;
 
+import com.devmare.lldforge.business.converter.TopicListConverter;
 import com.devmare.lldforge.data.enums.Difficulty;
 import com.devmare.lldforge.data.enums.Topic;
 import jakarta.persistence.*;
@@ -20,6 +21,7 @@ public class Question extends BaseEntity {
 
     private String description;
 
+    @Convert(converter = TopicListConverter.class)
     private List<Topic> topics;
 
     private String constraints;

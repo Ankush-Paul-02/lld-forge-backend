@@ -12,10 +12,10 @@ import java.util.List;
 
 @Getter
 @Setter
+@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
 @Table(name = "users")
 public class User extends BaseEntity implements UserDetails {
 

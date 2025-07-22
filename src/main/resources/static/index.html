@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Complete Payment</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+<h2>Redirecting to Razorpay...</h2>
+
+<script>
+    const responseData = {
+      orderId: "order_QwC4CHZ2UHIaEC",
+      amount: 15000,
+      currency: "INR",
+      sessionId: 4
+    };
+
+    const options = {
+      key: "rzp_test_2uMnnYIqqjz7aT", // Replace with your real Razorpay Key ID
+      amount: responseData.amount,
+      currency: responseData.currency,
+      name: "Book Mentorship",
+      description: "Mentorship Session Booking",
+      order_id: responseData.orderId,
+      handler: function (response) {
+        // Call your backend to verify payment and update session
+        alert("Payment Successful!");
+        window.location.href = `/payment-success?sessionId=${responseData.sessionId}`;
+      },
+      prefill: {
+        name: "Your Name",       // (Optional) prefill for user
+        email: "you@example.com"
+      },
+      theme: {
+        color: "#3399cc"
+      }
+    };
+
+    const rzp = new Razorpay(options);
+
+    rzp.on('payment.failed', function (response) {
+      alert("Payment failed: " + response.error.description);
+      window.location.href = `/payment-failed?sessionId=${responseData.sessionId}`;
+    });
+
+    rzp.open();
+</script>
+</body>
+</html>

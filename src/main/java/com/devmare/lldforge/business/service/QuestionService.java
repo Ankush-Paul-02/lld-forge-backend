@@ -1,6 +1,7 @@
 package com.devmare.lldforge.business.service;
 
 import com.devmare.lldforge.business.dto.CreateQuestionRequestDto;
+import com.devmare.lldforge.business.dto.MentorLeaderboardProjection;
 import com.devmare.lldforge.data.entity.Question;
 import org.springframework.data.domain.Page;
 
@@ -21,4 +22,6 @@ public interface QuestionService {
     void deleteQuestionById(Long id);
 
     Question updateQuestion(Long id, CreateQuestionRequestDto updatedQuestion);
+
+    List<MentorLeaderboardProjection> getMentorLeaderboard();
 }
