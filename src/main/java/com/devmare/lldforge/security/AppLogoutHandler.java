@@ -9,12 +9,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
 import static com.devmare.lldforge.business.dto.DefaultResponseDto.Status.SUCCESS;
 
 @Slf4j
+@Component
 public class AppLogoutHandler implements LogoutHandler {
 
     @Override

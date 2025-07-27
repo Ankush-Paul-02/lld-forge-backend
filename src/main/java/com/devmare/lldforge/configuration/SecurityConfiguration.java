@@ -21,7 +21,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 @Slf4j
 @Configuration
@@ -81,5 +83,15 @@ public class SecurityConfiguration {
                 );
         log.info("Security filter chain configured successfully");
         return http.build();
+    }
+
+    @Bean
+    public LogoutHandler logoutHandler() {
+        return new AppLogoutHandler();
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return new AppAccessDeniedHandler();
     }
 }
