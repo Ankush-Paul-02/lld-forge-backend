@@ -1,6 +1,8 @@
 package com.devmare.lldforge.configuration;
 
 import com.devmare.lldforge.data.enums.Role;
+import com.devmare.lldforge.security.AppAccessDeniedHandler;
+import com.devmare.lldforge.security.AppLogoutHandler;
 import com.devmare.lldforge.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +32,8 @@ public class SecurityConfiguration {
 
     private final UserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final AppLogoutHandler appLogoutHandler;
+    private final AppAccessDeniedHandler appAccessDeniedHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -63,11 +67,18 @@ public class SecurityConfiguration {
                         .anyRequest()
                         .authenticated()
                 )
+                .exceptionHandling(
+                        exception -> exception.accessDeniedHandler(appAccessDeniedHandler)
+                )
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .authenticationProvider(authenticationProvider());
+                .authenticationProvider(authenticationProvider())
+                .logout(logout -> logout
+                        .logoutUrl("/auth/logout")
+                        .addLogoutHandler(appLogoutHandler)
+                );
         log.info("Security filter chain configured successfully");
         return http.build();
     }
