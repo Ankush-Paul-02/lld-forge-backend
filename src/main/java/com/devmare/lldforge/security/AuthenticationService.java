@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Valid;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -36,6 +37,13 @@ public class AuthenticationService {
 
     @Transactional
     public void signupUser(SignupUserRequestDto request) {
+        String password = request.getPassword();
+        String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
+        if (!Pattern.matches(regex, password)) {
+            log.error("Invalid password format");
+            throw new AppInfoException("Password must be at least 8 characters long and include uppercase, lowercase, number, and special character", HttpStatus.BAD_REQUEST);
+        }
+
         ///  Check if user with the same username already exists or not
         if (userRepository.existsByEmail(request.getEmail())) {
             log.error("User with email {} already exists", request.getEmail());

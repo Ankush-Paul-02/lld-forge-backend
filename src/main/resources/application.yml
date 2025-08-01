@@ -51,6 +51,7 @@ lldforge:
   adminEmail: ankushpaulclg2002@gmail.com
 server:
   port: 8081
+  address: 0.0.0.0
   servlet:
     context-path: /api
 
