@@ -86,6 +86,7 @@ public class AuthenticationService {
     }
 
     public TokenPair refreshToken(@Valid RefreshTokenRequest request) {
+        log.info("Token refresh request received");
         if (!jwtService.isRefreshToken(request.getRefreshToken())) {
             throw new AppInfoException("Invalid refresh token", HttpStatus.BAD_REQUEST);
         }
@@ -104,6 +105,7 @@ public class AuthenticationService {
                         userDetails.getAuthorities()
                 );
         String accessToken = jwtService.generateAccessToken(authToken);
+        log.info("Token refreshed successfully");
         return TokenPair.builder()
                 .accessToken(accessToken)
                 .refreshToken(request.getRefreshToken())

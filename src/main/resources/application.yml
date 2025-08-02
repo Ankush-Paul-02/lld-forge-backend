@@ -63,9 +63,8 @@ app:
 # Jwt configuration
   jwt:
     secret: +5Y35EA91Ec1zS64aT3ZvJWeYsgEQpVTeFr7TQmRIA8=
-    expiration: 3600000
-    refresh-expiration: 864000000
-
+    expiration: 3600000 # in milliseconds - 1 hour
+    refresh-expiration: 864000000 # in milliseconds - 10 days
 
 # Razorpay sdk configuration
 razorpay:
