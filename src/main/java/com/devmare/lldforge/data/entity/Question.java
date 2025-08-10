@@ -28,7 +28,7 @@ public class Question extends BaseEntity {
 
     private String expectedEntitiesDescription;
 
-    @OneToOne
+    @ManyToOne
     private User author;
 
     private Long postedAt;

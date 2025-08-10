@@ -2,6 +2,7 @@ package com.devmare.lldforge.controller;
 
 import com.devmare.lldforge.business.dto.DefaultResponseDto;
 import com.devmare.lldforge.business.dto.RazorpayCreateOrderRequestDto;
+import com.devmare.lldforge.business.service.MentorshipService;
 import com.devmare.lldforge.business.service.QuestionService;
 import com.devmare.lldforge.business.service.RazorpayService;
 import com.devmare.lldforge.data.entity.User;
@@ -24,13 +25,14 @@ public class UserController {
     private final QuestionService questionService;
     private final RazorpayService razorpayService;
     private final AuthenticationService authenticationService;
+    private final MentorshipService mentorshipService;
 
     @GetMapping("/me")
     public ResponseEntity<DefaultResponseDto> getCurrentUserDetails() {
         User currentUser = authenticationService.fetchAuthenticatedUser();
         return ResponseEntity.ok(new DefaultResponseDto(
                 SUCCESS,
-                Map.of("user", currentUser),
+                Map.of("data", currentUser),
                 "Fetched current authenticated user details"
         ));
     }
@@ -55,6 +57,17 @@ public class UserController {
                         SUCCESS,
                         Map.of("data", razorpayService.createOrder(request)),
                         "Mentorship session booked successfully."
+                )
+        );
+    }
+
+    @GetMapping("/mentorship-sessions")
+    public ResponseEntity<DefaultResponseDto> getAllMentorshipSessionsByStudent() {
+        return ResponseEntity.ok(
+                new DefaultResponseDto(
+                        SUCCESS,
+                        Map.of("data", mentorshipService.getMentorshipSessionByStudent()),
+                        "Mentorship sessions fetched successfully."
                 )
         );
     }

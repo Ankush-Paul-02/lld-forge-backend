@@ -18,6 +18,8 @@ public class RazorpayOrder extends BaseEntity {
 
     private String paymentId; // filled after payment success
 
+    private Long paymentAt;
+
     @Column(nullable = false)
     private Integer amount; // in paise
 

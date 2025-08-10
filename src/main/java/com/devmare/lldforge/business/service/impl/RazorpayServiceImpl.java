@@ -12,15 +12,16 @@ import com.devmare.lldforge.data.exception.AppInfoException;
 import com.devmare.lldforge.data.repository.MentorshipSessionRepository;
 import com.devmare.lldforge.data.repository.RazorpayOrderRepository;
 import com.devmare.lldforge.data.repository.UserRepository;
-import com.devmare.lldforge.data.utils.RazorpaySignatureUtil;
 import com.devmare.lldforge.security.AuthenticationService;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
+import com.razorpay.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -106,67 +107,99 @@ public class RazorpayServiceImpl implements RazorpayService {
 
     @Override
     @Transactional
-    public void verifyAndProcessWebhook(String payload, String signature) {
-        log.info("[Webhook] Received Razorpay webhook. Verifying signature...");
-        /// Verify signature
-        boolean isValid = RazorpaySignatureUtil.verifySignature(payload, signature, RAZORPAY_API_SECRET);
-        if (!isValid) {
-            log.warn("[Webhook] Invalid Razorpay webhook signature. Possible spoof attempt.");
-            throw new AppInfoException("Invalid webhook signature", HttpStatus.FORBIDDEN);
+    public void verifyAndProcessWebhook(String payload, HttpHeaders httpHeaders) throws RazorpayException {
+        String eventId = httpHeaders.getFirst("x-razorpay-event-id");
+        if (eventId == null || eventId.isBlank()) {
+            throw new AppInfoException("Missing Razorpay event ID", HttpStatus.BAD_REQUEST);
         }
 
-        log.info("[Webhook] Signature verified. Parsing event payload...");
-        /// Parse payload
+        String webhookSignature = httpHeaders.getFirst("x-razorpay-signature");
+        if (webhookSignature == null || webhookSignature.isBlank()) {
+            log.error("[Webhook] Missing Razorpay signature");
+            throw new AppInfoException("Missing Razorpay signature", HttpStatus.BAD_REQUEST);
+        }
+
+        boolean isSignatureValid = Utils.verifyWebhookSignature(payload, webhookSignature, RAZORPAY_API_SECRET);
+        if (!isSignatureValid) {
+            log.error("[Webhook] Invalid webhook signature");
+            throw new AppInfoException("Invalid webhook signature", HttpStatus.UNAUTHORIZED);
+        }
+
+        log.info("[Webhook] Signature verification successful for event {}", eventId);
+        log.info("[Webhook] Processing event {} from Razorpay", eventId);
+
         JSONObject event = new JSONObject(payload);
         String eventType = event.getString("event");
 
-        if (!"payment.captured".equals(eventType)) {
-            log.info("[Webhook] Ignored event type: {}", eventType);
-            return;
-        }
+        // Extract payment details
+        JSONObject paymentEntity = event.getJSONObject("payload")
+                .getJSONObject("payment")
+                .getJSONObject("entity");
 
-        JSONObject paymentEntity = event.getJSONObject("payload").getJSONObject("payment").getJSONObject("entity");
-        String razorpayOrderId = paymentEntity.getString("order_id");
-        String razorpayPaymentId = paymentEntity.getString("id");
-        int amount = paymentEntity.optInt("amount", 0);
+        String razorpayOrderId = paymentEntity.optString("order_id", null);
+        String razorpayPaymentId = paymentEntity.optString("id", null);
+        int amount = paymentEntity.optInt("amount", -1);
 
         if (razorpayOrderId == null || razorpayPaymentId == null) {
-            log.error("[Webhook] Missing required fields in Razorpay payload. Order ID: {}, Payment ID: {}", razorpayOrderId, razorpayPaymentId);
+            log.error("[Webhook] Missing required fields for event {}", eventId);
             throw new AppInfoException("Invalid webhook payload", HttpStatus.BAD_REQUEST);
         }
 
-        log.info("[Webhook] Payment captured for orderId={}, paymentId={}, amount={}", razorpayOrderId, razorpayPaymentId, amount);
-
-        /// Lookup order
-        Optional<RazorpayOrder> optionalRazorpayOrder = razorpayOrderRepository.findByRazorpayOrderId(razorpayOrderId);
-        if (optionalRazorpayOrder.isEmpty()) {
-            log.error("[Webhook] RazorpayOrder not found for razorpayOrderId={}", razorpayOrderId);
-            throw new AppInfoException("Order not found for webhook", HttpStatus.NOT_FOUND);
+        Optional<RazorpayOrder> optionalOrder = razorpayOrderRepository.findByRazorpayOrderId(razorpayOrderId);
+        if (optionalOrder.isEmpty()) {
+            throw new AppInfoException("Order not found", HttpStatus.NOT_FOUND);
         }
 
-        RazorpayOrder order = optionalRazorpayOrder.get();
+        RazorpayOrder order = optionalOrder.get();
 
+        // Handle only captured & failed events
+        switch (eventType) {
+            case "payment.captured":
+                handlePaymentCaptured(order, amount, razorpayPaymentId, eventId);
+                break;
+
+            case "payment.failed":
+                handlePaymentFailed(order, razorpayPaymentId, eventId);
+                break;
+
+            default:
+                log.info("[Webhook] Ignoring event type: {} for event {}", eventType, eventId);
+        }
+    }
+
+    private void handlePaymentCaptured(RazorpayOrder order, int amount, String paymentId, String eventId) {
         if (order.getStatus() == OrderStatus.PAID) {
-            log.info("[Webhook] Order already marked as paid. Skipping duplicate webhook for orderId={}", razorpayOrderId);
+            log.info("[Webhook] Order already paid, skipping event {}", eventId);
             return;
         }
-
-        // Update order
+        if (amount != order.getAmount()) {
+            throw new AppInfoException("Amount mismatch", HttpStatus.BAD_REQUEST);
+        }
         order.setStatus(OrderStatus.PAID);
-        order.setPaymentId(razorpayPaymentId);
+        order.setPaymentId(paymentId);
+        order.setPaymentAt(Instant.now().getEpochSecond());
         razorpayOrderRepository.save(order);
-        log.info("[Webhook] Order status updated to PAID for orderId={}", razorpayOrderId);
 
-        // Update session
         MentorshipSession session = order.getSession();
         if (session != null) {
             session.setStatus(MentorshipSessionStatus.PAID);
             session.setPaymentVerified(true);
             mentorshipSessionRepository.save(session);
-        } else {
-            log.warn("[Webhook] No mentorship session linked to orderId={}", razorpayOrderId);
         }
+        log.info("[Webhook] Payment captured and order marked as PAID for event {}", eventId);
+    }
 
-        log.info("Webhook processed for orderId={}, paymentId={}", razorpayOrderId, razorpayPaymentId);
+    private void handlePaymentFailed(RazorpayOrder order, String paymentId, String eventId) {
+        order.setStatus(OrderStatus.FAILED);
+        order.setPaymentId(paymentId);
+        razorpayOrderRepository.save(order);
+
+        MentorshipSession session = order.getSession();
+        if (session != null) {
+            session.setStatus(MentorshipSessionStatus.CANCELLED);
+            session.setPaymentVerified(false);
+            mentorshipSessionRepository.save(session);
+        }
+        log.warn("[Webhook] Payment failed for event {}", eventId);
     }
 }
