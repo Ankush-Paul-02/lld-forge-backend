@@ -38,6 +38,7 @@ public class RazorpayServiceImpl implements RazorpayService {
     private final AuthenticationService authenticationService;
     private final RazorpayOrderRepository razorpayOrderRepository;
     private final MentorshipSessionRepository mentorshipSessionRepository;
+
     @Value("${razorpay.api.key}")
     private String RAZORPAY_API_KEY;
     @Value("${razorpay.api.secret}")
@@ -94,12 +95,14 @@ public class RazorpayServiceImpl implements RazorpayService {
                     .build();
 
             razorpayOrderRepository.save(order);
+
             return RazorpayOrderResponseDto.builder()
                     .orderId(order.getRazorpayOrderId())
                     .amount(order.getAmount())
                     .currency(order.getCurrency())
                     .sessionId(session.getId())
                     .build();
+
         } catch (RazorpayException e) {
             throw new AppInfoException("Error while creating Razorpay order: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -126,12 +129,10 @@ public class RazorpayServiceImpl implements RazorpayService {
         }
 
         log.info("[Webhook] Signature verification successful for event {}", eventId);
-        log.info("[Webhook] Processing event {} from Razorpay", eventId);
 
         JSONObject event = new JSONObject(payload);
         String eventType = event.getString("event");
 
-        // Extract payment details
         JSONObject paymentEntity = event.getJSONObject("payload")
                 .getJSONObject("payment")
                 .getJSONObject("entity");
@@ -152,7 +153,6 @@ public class RazorpayServiceImpl implements RazorpayService {
 
         RazorpayOrder order = optionalOrder.get();
 
-        // Handle only captured & failed events
         switch (eventType) {
             case "payment.captured":
                 handlePaymentCaptured(order, amount, razorpayPaymentId, eventId);
@@ -163,33 +163,50 @@ public class RazorpayServiceImpl implements RazorpayService {
                 break;
 
             default:
-                log.info("[Webhook] Ignoring event type: {} for event {}", eventType, eventId);
+                log.info("[Webhook] Unhandled event type: {} for event {}", eventType, eventId);
         }
     }
 
     private void handlePaymentCaptured(RazorpayOrder order, int amount, String paymentId, String eventId) {
         if (order.getStatus() == OrderStatus.PAID) {
-            log.info("[Webhook] Order already paid, skipping event {}", eventId);
+            log.info("[Webhook] Duplicate capture event ignored for order {}", order.getRazorpayOrderId());
             return;
         }
         if (amount != order.getAmount()) {
+            log.error("[Webhook] Amount mismatch for order {}: expected {}, got {}", order.getRazorpayOrderId(), order.getAmount(), amount);
             throw new AppInfoException("Amount mismatch", HttpStatus.BAD_REQUEST);
         }
+        if (order.getStatus() != OrderStatus.CREATED) {
+            log.warn("[Webhook] Captured payment for order {} in unexpected state {}", order.getRazorpayOrderId(), order.getStatus());
+        }
+
         order.setStatus(OrderStatus.PAID);
         order.setPaymentId(paymentId);
         order.setPaymentAt(Instant.now().getEpochSecond());
         razorpayOrderRepository.save(order);
 
         MentorshipSession session = order.getSession();
-        if (session != null) {
-            session.setStatus(MentorshipSessionStatus.PAID);
-            session.setPaymentVerified(true);
-            mentorshipSessionRepository.save(session);
+        if (session == null) {
+            log.error("[Webhook] Order {} has no associated session", order.getRazorpayOrderId());
+            return;
         }
+        if (session.getStatus() == MentorshipSessionStatus.CANCELLED) {
+            log.warn("[Webhook] Payment captured for cancelled session {} - manual action may be required", session.getId());
+        }
+
+        session.setStatus(MentorshipSessionStatus.PAID);
+        session.setPaymentVerified(true);
+        mentorshipSessionRepository.save(session);
+
         log.info("[Webhook] Payment captured and order marked as PAID for event {}", eventId);
     }
 
     private void handlePaymentFailed(RazorpayOrder order, String paymentId, String eventId) {
+        if (order.getStatus() == OrderStatus.FAILED) {
+            log.info("[Webhook] Duplicate failed event ignored for order {}", order.getRazorpayOrderId());
+            return;
+        }
+
         order.setStatus(OrderStatus.FAILED);
         order.setPaymentId(paymentId);
         razorpayOrderRepository.save(order);
@@ -199,7 +216,10 @@ public class RazorpayServiceImpl implements RazorpayService {
             session.setStatus(MentorshipSessionStatus.CANCELLED);
             session.setPaymentVerified(false);
             mentorshipSessionRepository.save(session);
+        } else {
+            log.error("[Webhook] Order {} has no associated session", order.getRazorpayOrderId());
         }
+
         log.warn("[Webhook] Payment failed for event {}", eventId);
     }
 }

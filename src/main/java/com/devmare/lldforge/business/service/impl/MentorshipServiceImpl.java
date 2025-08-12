@@ -28,7 +28,7 @@ public class MentorshipServiceImpl implements MentorshipService {
 
         User currentUser = authenticationService.fetchAuthenticatedUser();
 
-        return mentorshipSessionRepository.findAllByStudent(currentUser).stream().map(
+        return mentorshipSessionRepository.findAllByStudentOrderByCreatedAtDesc(currentUser).stream().map(
                 session -> {
                     Optional<RazorpayOrder> optionalRazorpayOrder = razorpayOrderRepository.findBySession(session);
                     if (optionalRazorpayOrder.isEmpty()) {

@@ -10,5 +10,5 @@ import java.util.List;
 @Repository
 public interface MentorshipSessionRepository extends JpaRepository<MentorshipSession, Long> {
 
-    List<MentorshipSession> findAllByStudent(User user);
+    List<MentorshipSession> findAllByStudentOrderByCreatedAtDesc(User user);
 }
